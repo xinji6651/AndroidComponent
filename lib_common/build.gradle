@@ -1,0 +1,108 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'kotlin-parcelize'
+    id 'maven-publish'
+}
+
+android {
+    compileSdk rootProject.ext.android.compileSdk
+
+    defaultConfig {
+        minSdk rootProject.ext.android.minSdk
+        targetSdk rootProject.ext.android.targetSdk
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+
+        // ARouter配置
+        kapt {
+            arguments {
+                arg("AROUTER_MODULE_NAME", project.getName())
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    buildFeatures {
+        dataBinding true
+    }
+    namespace 'com.btpj.lib_base'
+}
+
+dependencies {
+    api rootProject.ext.dependencies.coreKtx
+    api rootProject.ext.dependencies.appcompat
+    api rootProject.ext.dependencies.material
+    api rootProject.ext.dependencies.constraintlayout
+    api rootProject.ext.dependencies.junit
+    api rootProject.ext.dependencies.junitExt
+    api rootProject.ext.dependencies.espresso
+
+    // jetpack
+    api rootProject.ext.dependencies.viewModelKtx
+    api rootProject.ext.dependencies.liveDataKtx
+
+    // UI相关
+    api rootProject.ext.dependencies.swiperefreshlayout
+    api rootProject.ext.dependencies.recyclerview
+    api rootProject.ext.dependencies.BaseRecyclerViewAdapterHelper
+    api rootProject.ext.dependencies.materialDialogsCore
+    api rootProject.ext.dependencies.materialDialogsLifecycle
+    api rootProject.ext.dependencies.materialDialogsbottomsheets
+    api rootProject.ext.dependencies.AndroidAutoSize
+    api rootProject.ext.dependencies.agentWeb
+    // 轮播图 https://github.com/youth5201314/banner
+    api rootProject.ext.dependencies.banner
+    api rootProject.ext.dependencies.flexbox
+
+    // 存储相关
+    api rootProject.ext.dependencies.mmkv
+
+    // 图片
+    api rootProject.ext.dependencies.glide
+
+    // 网络相关
+    api rootProject.ext.dependencies.retrofit
+    api rootProject.ext.dependencies.converterGson
+    api rootProject.ext.dependencies.loggingInterceptor
+    api rootProject.ext.dependencies.PersistentCookieJar
+
+    // ARouter路由
+    api rootProject.ext.dependencies.arouter_api
+
+    // bugly
+    api rootProject.ext.dependencies.bugly_update
+    api rootProject.ext.dependencies.bugly_nativecrashreport
+
+    // 使用debugApi只在调试时引入
+    debugApi rootProject.ext.dependencies.leakcanary
+}
+
+afterEvaluate {
+    // 官方建议使用上传方法
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                from components.release // 表示发布 release（jitpack 都不会使用到）
+                groupId = 'com.github.githubAndroidComponent' //groupId 随便取 , 这个是依赖库的组 id
+                artifactId = 'AndroidComponent'  //artifactId 随便取 , 依赖库的名称（jitpack 都不会使用到）
+                version = '1.0.0' // 当前版本依赖库版本号，这个jitpack不会使用到，只是我们开发者自己查看
+            }
+        }
+    }
+}

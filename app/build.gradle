@@ -1,0 +1,98 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'kotlin-parcelize'
+}
+
+android {
+    namespace 'com.btpj.wanandroid'
+
+    compileSdk rootProject.ext.android.compileSdk
+
+    defaultConfig {
+        applicationId "com.btpj.wanandroid"
+        minSdk rootProject.ext.android.minSdk
+        targetSdk rootProject.ext.android.targetSdk
+        versionCode rootProject.ext.android.versionCode
+        versionName rootProject.ext.android.versionName
+
+        ndk {
+            // 设置支持的SO库架构，以微信为基准只支持arm64-v8a即可，可以达到缩包的目的
+            abiFilters 'arm64-v8a'//, 'armeabi'//, 'armeabi-v7a', 'x86', 'x86_64'
+        }
+        resConfigs 'zh-rCN'
+
+        // 只保留汉语资源
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // ARouter配置
+        kapt {
+            arguments {
+                arg("AROUTER_MODULE_NAME", project.getName())
+            }
+        }
+    }
+
+    // 调试版设置统一的Key，多人开发时更方便，
+    // 譬如一些地图配置调试的key时，每个开发者都能正常显示（不配置时默认签名每个人都不一样）
+    signingConfigs {
+        debug {
+            storeFile file('./sign/debug.jks')
+            storePassword '19910901'
+            keyAlias = 'LTP'
+            keyPassword '19910901'
+        }
+    }
+
+    buildTypes {
+        debug {
+            // 设置调试时包名后添加debug以防止与正式版安装冲突
+            applicationIdSuffix '.debug'
+
+            // 假如打包后运行闪退，可以在调试模式下打开混淆查看日志找出混淆问题
+            minifyEnabled false // 开启混淆
+            shrinkResources false // 启动资源压缩
+            zipAlignEnabled false // 开启zipalign优化
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+
+        release {
+            minifyEnabled true // 开启混淆
+            shrinkResources true // 启动资源压缩
+            zipAlignEnabled true // 开启zipalign优化
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            applicationVariants.all { variant ->
+                variant.outputs.all { output ->
+                    // 输出apk名称为：App名_版本名.apk
+                    outputFileName = "WanAndroid_V${defaultConfig.versionName}.apk"
+                }
+            }
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    buildFeatures {
+        dataBinding true
+    }
+}
+
+dependencies {
+    implementation project(path: ':lib_common')
+    if (!rootProject.ext.isBuildModule) {
+        implementation project(path: ':module_main')
+        implementation project(path: ':module_home')
+        implementation project(path: ':module_project')
+        implementation project(path: ':module_square')
+        implementation project(path: ':module_wechat')
+        implementation project(path: ':module_mine')
+        implementation project(path: ':module_web')
+    }
+}
